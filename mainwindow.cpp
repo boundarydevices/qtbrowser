@@ -42,6 +42,31 @@
 #include <QtWebKit>
 #include <QtNetwork/QNetworkConfigurationManager>
 #include "mainwindow.h"
+#include <QtNetwork/QNetworkCookieJar>
+
+class MyNetworkCookieJar : public QNetworkCookieJar {
+public:
+	MyNetworkCookieJar ( QObject * parent = 0 )
+		: QNetworkCookieJar(parent){
+		printf("%s\n", __func__ );
+	}
+	virtual ~MyNetworkCookieJar () {
+		printf("%s\n", __func__ );
+	}
+	virtual QList<QNetworkCookie> cookiesForUrl ( const QUrl & url ) const {
+		printf("%s: %s\n", __func__, url.toString().toUtf8().data() );
+		return QNetworkCookieJar::cookiesForUrl(url);
+	}
+        virtual bool setCookiesFromUrl ( const QList<QNetworkCookie> & cookieList, const QUrl & url ) {
+		printf("%s: %s\n", __func__, url.toString().toUtf8().data() );
+		QList<QNetworkCookie>::const_iterator it = cookieList.begin();
+		while (it != cookieList.end()) {
+			QNetworkCookie cookie = *it++ ;
+			printf( "\t%s: %s\n", cookie.name().constData(), cookie.value().constData());
+		}
+                return QNetworkCookieJar::setCookiesFromUrl(cookieList,url);
+	}
+};
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(__arr) (sizeof(__arr)/sizeof(__arr[0]))
@@ -88,6 +113,15 @@ static bool ssl_errors_forgivable(const QList<QSslError> & errors )
                      && forgivable_ssl_errors[errcode];
     }
     return forgivable ;
+}
+
+popupWebView_t::popupWebView_t(QWidget* parent)
+    : QWebView(parent){
+    printf( "popup constructor: parent == %p\n", parent);
+}
+
+popupWebView_t::~popupWebView_t() {
+	printf("%s\n", __func__ );
 }
 
 void popupWebView_t::finishLoading(bool){ printf ("%s: %llu bytes\n", __func__, page()->totalBytes()); }
@@ -138,6 +172,9 @@ QWebView *mainWebView_t::createWindow(QWebPage::WebWindowType type)
 		connect(rval->page()->mainFrame(), SIGNAL(loadStarted()), rval, SLOT(loadStarted()));
 		connect(rval->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), rval, SLOT(javaScriptWindowObjectCleared()));
 		connect(rval->page(), SIGNAL(frameCreated(QWebFrame*)), rval, SLOT(frameCreated(QWebFrame*)));
+                QNetworkCookieJar *old_jar = na_manager->cookieJar();
+		na_manager->setCookieJar(new MyNetworkCookieJar(old_jar?old_jar->parent() : 0));
+		printf( "%s: set cookie jar to %p\n", __func__, na_manager->cookieJar());
 	}
 	return rval ;
 }
@@ -208,6 +245,10 @@ MainWindow::MainWindow(const QUrl& url)
     connect(na_manager, SIGNAL(proxyAuthenticationRequired (const QNetworkProxy &, QAuthenticator *)), this, SLOT(proxyAuthenticationRequired (const QNetworkProxy &, QAuthenticator *)));
     connect(na_manager, SIGNAL(sslErrors(QNetworkReply *, const QList<QSslError> &)), this, SLOT(sslErrors(QNetworkReply *, const QList<QSslError> &)));
     printf("Network access manager signals connected\n");
+
+    QNetworkCookieJar *old_jar = na_manager->cookieJar();
+    na_manager->setCookieJar(new MyNetworkCookieJar(old_jar?old_jar->parent() : 0));
+    printf( "set cookie jar to %p\n", na_manager->cookieJar());
 
     connect(view->page()->mainFrame(), SIGNAL(loadStarted()), this, SLOT(loadStarted()));
     connect(view->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(javaScriptWindowObjectCleared()));

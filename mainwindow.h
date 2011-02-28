@@ -56,7 +56,8 @@ QT_END_NAMESPACE
 class popupWebView_t : public QWebView {
     Q_OBJECT
 public:
-	explicit popupWebView_t(QWidget* parent = 0): QWebView(parent){}
+	explicit popupWebView_t(QWidget* parent = 0);
+    virtual ~popupWebView_t();
 protected slots:
     void finishLoading(bool);
     void loadStarted();
