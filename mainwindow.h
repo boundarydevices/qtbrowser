@@ -42,6 +42,7 @@
 #include <QLinkedList>
 #include "kbdInput.h"
 #include "bcInput.h"
+#include "magstripe.h"
 #include <QWebView>
 #include <QtNetwork/QNetworkSession>
 #include <QtNetwork/QNetworkAccessManager>
@@ -117,4 +118,5 @@ private:
     QWebView *view;
     kbdInput_t	kbd ;
     bcInput_t   bc ;
+    magstripe_t magstripe ;
 };

@@ -10,8 +10,8 @@ QT=${LTIB}/usr/local/Trolltech/Qt-4.7.1
 QTINC=${QT}/include
 QTLIB=${QT}/lib
 
-CXXFLAGS=-I${LTIB}usr/include -I${QTINC} -I${QTINC}/QtGui -I${QTINC}/QtCore -I${QTINC}/QtWebKit
-LDFLAGS=-L${QTLIB} -lQtWebKit -lQtGui -Wl,-rpath-link,${QTLIB} -Wl,-rpath-link,${LTIB}/lib -Wl,-rpath-link,${LTIB}/usr/lib
+CXXFLAGS=-I${LTIB}usr/include -I${QTINC} -I${QTINC}/QtGui -I${QTINC}/QtCore -I${QTINC}/QtWebKit -O0 -ggdb -Wall -Wno-psabi
+LDFLAGS=-ggdb -L${QTLIB} -lQtWebKit -lQtGui -Wl,-rpath-link,${QTLIB} -Wl,-rpath-link,${LTIB}/lib -Wl,-rpath-link,${LTIB}/usr/lib
 
 moc_%.cpp: %.h
 	moc $< -o $@
@@ -20,9 +20,9 @@ moc_%.cpp: %.h
 	@echo "=== compiling:" $@ ${OPT} ${CXXFLAGS} 
 	@${CXX} -c ${CXXFLAGS} ${INCS} ${DEFS} $< -o $@
 
-qtbrowser: main.o kbdInput.o moc_kbdInput.o bcInput.o moc_bcInput.o moc_mainwindow.o mainwindow.o
+qtbrowser: main.o kbdInput.o moc_kbdInput.o bcInput.o moc_bcInput.o magstripe.o moc_magstripe.o moc_mainwindow.o mainwindow.o
 	@echo "=== linking:" $@
 	${CXX} ${LDFLAGS} $^ -o $@
 
 clean:
-	rm -f *.o qtbrowser
+	rm -f *.o qtbrowser moc_*.cpp

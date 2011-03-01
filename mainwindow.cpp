@@ -183,6 +183,7 @@ MainWindow::MainWindow(const QUrl& url)
 	: QMainWindow(0,Qt::FramelessWindowHint)
 	, kbd()
 	, bc()
+	, magstripe()
 {
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -278,6 +279,7 @@ void MainWindow::javaScriptWindowObjectCleared(void)
 	printf( "%s\n", __func__ );
         view->page()->mainFrame()->addToJavaScriptWindowObject("keyboard",&kbd);
         view->page()->mainFrame()->addToJavaScriptWindowObject("scanner",&bc);
+        view->page()->mainFrame()->addToJavaScriptWindowObject("magstripe",&magstripe);
 }
 
 void MainWindow::frameCreated(QWebFrame *frame)
