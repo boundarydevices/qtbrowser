@@ -114,7 +114,6 @@ bcInput_t::bcInput_t()
 			tcgetattr(fd,&newState);
 			newState.c_cc[VMIN] = 1;
 			
-			bool nonStandard = false ;
 			unsigned baudConst ;
 			if( baudRateToConst(baud, baudConst ) ){
 				cfsetispeed(&newState, baudConst);
