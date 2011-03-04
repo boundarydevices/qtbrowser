@@ -84,6 +84,7 @@ private:
 	char		buf_[2048];
 	int		len_ ;
         enum command_e 	prev_command_ ;
+	void	       *prev_ctx_ ;
 	long long	serial_ ;
 };
 

@@ -25,6 +25,7 @@ stronglink_t::stronglink_t (char const *devname)
 	: fd_(open(devname, O_RDWR|O_NONBLOCK))
 	, len_(0)
 	, prev_command_(SL_RESET)
+	, prev_ctx_(0)
 	, serial_(NOCARDSERIAL)
 {
 	if (!isOpen()) {
@@ -95,6 +96,7 @@ bool stronglink_t::send (enum command_e cmd, void const *data, unsigned datalen,
 #endif
 	if (xlen == write(fd_,buf,xlen)) {
 		prev_command_ = cmd ;
+                prev_ctx_ = context ;
 		return true ;
 	} else {
 		return false ;
@@ -160,6 +162,8 @@ bool stronglink_t::receive (enum response_e &value, void const *&data, unsigned 
 					} else if (SLSTAT_NOCARD == value) {
 						serial_ = NOCARDSERIAL ;
 					}
+					context = prev_ctx_ ;
+					prev_ctx_ = 0 ;
 					return true ;
 				}
 			}
