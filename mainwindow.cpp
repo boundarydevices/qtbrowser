@@ -184,6 +184,7 @@ MainWindow::MainWindow(const QUrl& url)
 	, kbd()
 	, bc()
 	, magstripe()
+	, rfid()
 {
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -280,6 +281,7 @@ void MainWindow::javaScriptWindowObjectCleared(void)
         view->page()->mainFrame()->addToJavaScriptWindowObject("keyboard",&kbd);
         view->page()->mainFrame()->addToJavaScriptWindowObject("scanner",&bc);
         view->page()->mainFrame()->addToJavaScriptWindowObject("magstripe",&magstripe);
+        view->page()->mainFrame()->addToJavaScriptWindowObject("rfid",&rfid);
 }
 
 void MainWindow::frameCreated(QWebFrame *frame)

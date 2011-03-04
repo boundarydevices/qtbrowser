@@ -43,6 +43,7 @@
 #include "kbdInput.h"
 #include "bcInput.h"
 #include "magstripe.h"
+#include "rfid.h"
 #include <QWebView>
 #include <QtNetwork/QNetworkSession>
 #include <QtNetwork/QNetworkAccessManager>
@@ -119,4 +120,5 @@ private:
     kbdInput_t	kbd ;
     bcInput_t   bc ;
     magstripe_t magstripe ;
+    rfidReader_t rfid ;
 };

@@ -20,9 +20,20 @@ moc_%.cpp: %.h
 	@echo "=== compiling:" $@ ${OPT} ${CXXFLAGS} 
 	@${CXX} -c ${CXXFLAGS} ${INCS} ${DEFS} $< -o $@
 
-qtbrowser: main.o kbdInput.o moc_kbdInput.o bcInput.o moc_bcInput.o magstripe.o moc_magstripe.o moc_mainwindow.o mainwindow.o
+
+qtbrowser: main.o \
+	kbdInput.o moc_kbdInput.o \
+	bcInput.o moc_bcInput.o \
+	magstripe.o moc_magstripe.o \
+	mainwindow.o moc_mainwindow.o \
+	stronglink.o rfid.o moc_rfid.o
 	@echo "=== linking:" $@
 	${CXX} ${LDFLAGS} $^ -o $@
 
+stronglink: stronglink.cpp
+	@echo "=== compiling:" $@
+	${CXX} -DSTRONGLINK_TEST ${CXXFLAGS} ${LDFLAGS} $^ -o $@
+
+all: qtbrowser stronglink
 clean:
 	rm -f *.o qtbrowser moc_*.cpp
