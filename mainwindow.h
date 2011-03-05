@@ -95,7 +95,6 @@ public:
     MainWindow(const QUrl& url);
 
 protected slots:
-
     void finishLoading(bool);
     void loadStarted();
     void javaScriptWindowObjectCleared();
@@ -114,8 +113,10 @@ protected slots:
     void proxyAuthenticationRequired ( const QNetworkProxy & proxy, QAuthenticator * authenticator );
     void sslErrors ( QNetworkReply * reply, const QList<QSslError> & errors );
 
+    void readStdin(int fd);
 private:
     QLinkedList<QString> jsFiles ;
+    QSocketNotifier	 stdinReady ;
     QWebView *view;
     kbdInput_t	kbd ;
     bcInput_t   bc ;

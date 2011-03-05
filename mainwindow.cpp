@@ -43,6 +43,7 @@
 #include <QtNetwork/QNetworkConfigurationManager>
 #include "mainwindow.h"
 #include <QtNetwork/QNetworkCookieJar>
+#include <fcntl.h>
 
 class MyNetworkCookieJar : public QNetworkCookieJar {
 public:
@@ -181,6 +182,7 @@ QWebView *mainWebView_t::createWindow(QWebPage::WebWindowType type)
 
 MainWindow::MainWindow(const QUrl& url)
 	: QMainWindow(0,Qt::FramelessWindowHint)
+	, stdinReady(fileno(stdin), stdinReady.Read)
 	, kbd()
 	, bc()
 	, magstripe()
@@ -258,6 +260,9 @@ MainWindow::MainWindow(const QUrl& url)
     setCentralWidget(view);
     resize(QSize(screen_size.width(),screen_size.height()));
     view->page()->settings()->setAttribute(QWebSettings::JavascriptCanOpenWindows, true);
+
+    fcntl(0, F_SETFL, fcntl(0, F_GETFL)|O_NONBLOCK);
+    QObject::connect(&stdinReady, SIGNAL(activated(int)), this, SLOT(readStdin(int)));
 }
 
 void MainWindow::finishLoading(bool success)
@@ -342,4 +347,17 @@ void MainWindow::sslErrors ( QNetworkReply * reply, const QList<QSslError> & err
     }
 }
 
+#include <QDebug>
+
+void MainWindow::readStdin(int fd)
+{
+	char inbuf[2048];
+	int numRead ;
+	while (0 < (numRead = read(fd,inbuf,sizeof(inbuf)-1))) {
+		inbuf[numRead] = 0 ;
+		QString qs(inbuf);
+                QVariant result = view->page()->mainFrame()->evaluateJavaScript(qs);
+		qDebug() << result ;
+	}
+}
 
