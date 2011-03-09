@@ -287,6 +287,7 @@ void MainWindow::javaScriptWindowObjectCleared(void)
         view->page()->mainFrame()->addToJavaScriptWindowObject("scanner",&bc);
         view->page()->mainFrame()->addToJavaScriptWindowObject("magstripe",&magstripe);
         view->page()->mainFrame()->addToJavaScriptWindowObject("rfid",&rfid);
+        view->page()->mainFrame()->addToJavaScriptWindowObject("accel",&accel);
 }
 
 void MainWindow::frameCreated(QWebFrame *frame)

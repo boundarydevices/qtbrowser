@@ -42,6 +42,7 @@
 #include <QLinkedList>
 #include "kbdInput.h"
 #include "bcInput.h"
+#include "accelInput.h"
 #include "magstripe.h"
 #include "rfid.h"
 #include <QWebView>
@@ -120,6 +121,7 @@ private:
     QWebView *view;
     kbdInput_t	kbd ;
     bcInput_t   bc ;
+    accelInput_t accel ;
     magstripe_t magstripe ;
     rfidReader_t rfid ;
 };
