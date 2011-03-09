@@ -24,6 +24,7 @@ moc_%.cpp: %.h
 qtbrowser: main.o \
 	kbdInput.o moc_kbdInput.o \
 	bcInput.o moc_bcInput.o \
+	gpsInput.o moc_gpsInput.o \
 	accelInput.o moc_accelInput.o \
 	magstripe.o moc_magstripe.o \
 	mainwindow.o moc_mainwindow.o \
