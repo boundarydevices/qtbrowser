@@ -28,6 +28,7 @@ qtbrowser: main.o \
 	accelInput.o moc_accelInput.o \
 	magstripe.o moc_magstripe.o \
 	mainwindow.o moc_mainwindow.o \
+	process.o moc_process.o \
 	stronglink.o rfid.o moc_rfid.o
 	@echo "=== linking:" $@
 	${CXX} ${LDFLAGS} $^ -o $@

@@ -187,6 +187,7 @@ MainWindow::MainWindow(const QUrl& url)
 	, bc()
 	, magstripe()
 	, rfid()
+	, process()
 {
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -289,6 +290,7 @@ void MainWindow::javaScriptWindowObjectCleared(void)
         view->page()->mainFrame()->addToJavaScriptWindowObject("rfid",&rfid);
         view->page()->mainFrame()->addToJavaScriptWindowObject("accel",&accel);
         view->page()->mainFrame()->addToJavaScriptWindowObject("gps",&gps);
+        view->page()->mainFrame()->addToJavaScriptWindowObject("Process",&process);
 }
 
 void MainWindow::frameCreated(QWebFrame *frame)

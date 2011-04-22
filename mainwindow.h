@@ -45,6 +45,7 @@
 #include "accelInput.h"
 #include "gpsInput.h"
 #include "magstripe.h"
+#include "process.h"
 #include "rfid.h"
 #include <QWebView>
 #include <QtNetwork/QNetworkSession>
@@ -126,4 +127,5 @@ private:
     gpsInput_t gps ;
     magstripe_t magstripe ;
     rfidReader_t rfid ;
+    process_t	 process ;
 };
