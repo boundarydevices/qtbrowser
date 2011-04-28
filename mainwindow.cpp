@@ -182,7 +182,7 @@ QWebView *mainWebView_t::createWindow(QWebPage::WebWindowType type)
 
 MainWindow::MainWindow(const QUrl& url)
 	: QMainWindow(0,Qt::FramelessWindowHint)
-	, stdinReady(fileno(stdin), stdinReady.Read)
+	, stdinReady(fileno(stdin), isatty(fileno(stdin)) ? stdinReady.Read : stdinReady.Exception)
 	, kbd()
 	, bc()
 	, magstripe()
@@ -262,8 +262,12 @@ MainWindow::MainWindow(const QUrl& url)
     resize(QSize(screen_size.width(),screen_size.height()));
     view->page()->settings()->setAttribute(QWebSettings::JavascriptCanOpenWindows, true);
 
-    fcntl(0, F_SETFL, fcntl(0, F_GETFL)|O_NONBLOCK);
-    QObject::connect(&stdinReady, SIGNAL(activated(int)), this, SLOT(readStdin(int)));
+    if (isatty(fileno(stdin))) {
+	    fcntl(0, F_SETFL, fcntl(0, F_GETFL)|O_NONBLOCK);
+	    QObject::connect(&stdinReady, SIGNAL(activated(int)), this, SLOT(readStdin(int)));
+    }
+    else
+	    printf( "stdin is not a tty\n");
 }
 
 void MainWindow::finishLoading(bool success)
