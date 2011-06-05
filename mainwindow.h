@@ -85,9 +85,13 @@ protected slots:
 
 class mainWebView_t : public QWebView {
 public:
-	explicit mainWebView_t(QWidget* parent = 0): QWebView(parent){}
+	explicit mainWebView_t(QWidget* parent = 0): QWebView(parent), corners_(0){}
 protected:
 	virtual QWebView *createWindow(QWebPage::WebWindowType type);
+	void mouseMoveEvent ( QMouseEvent * ev );
+	void mouseReleaseEvent ( QMouseEvent * ev );
+private:
+	unsigned corners_ ;
 };
 
 class MainWindow : public QMainWindow

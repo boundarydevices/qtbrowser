@@ -180,6 +180,52 @@ QWebView *mainWebView_t::createWindow(QWebPage::WebWindowType type)
 	return rval ;
 }
 
+enum corner_e {
+	TOP_LEFT=1,
+	BOTTOM_LEFT=2,
+	TOP_RIGHT=4,
+	BOTTOM_RIGHT=8,
+	ALL_CORNERS=0x0f
+} ;
+
+static unsigned corner_bit(int x, int y, int w, int h){
+	bool hedge = false ;
+	unsigned corner = 0 ;
+	if (x < (w/8)) {
+		hedge=true ;
+		corner=TOP_LEFT ;
+	} else if (x > ((w*7)/8)) {
+		hedge=true;
+		corner=TOP_RIGHT ;
+	}
+	if (hedge) {
+		if (y < (h/8)) {
+			return corner ;
+		} else if (y > ((h*7)/8)) {
+			return corner*2 ;
+		}
+	}
+	return 0 ;
+}
+
+void mainWebView_t::mouseMoveEvent ( QMouseEvent * ev )
+{
+	corners_ |= corner_bit(ev->x(), ev->y(),this->width(), this->height());
+	printf( "%s:%u:%u of %ux%u: %x\n", __func__, ev->x(), ev->y(),this->width(),this->height(), corners_ );
+	return QWebView::mouseMoveEvent(ev);
+}
+
+void mainWebView_t::mouseReleaseEvent ( QMouseEvent * ev )
+{
+	if (ALL_CORNERS==corners_) {
+		exit(0);
+	}
+	else {
+		corners_ = 0 ;
+		return QWebView::mouseReleaseEvent(ev);
+	}
+}
+
 MainWindow::MainWindow(const QUrl& url)
 	: QMainWindow(0,Qt::FramelessWindowHint)
 	, stdinReady(fileno(stdin), isatty(fileno(stdin)) ? stdinReady.Read : stdinReady.Exception)
