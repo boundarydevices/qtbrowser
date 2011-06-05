@@ -25,6 +25,7 @@ private slots:
 	void 	readyReadStandardOutput(void);
 	void 	started (void);
 	void 	stateChanged ( QProcess::ProcessState newState );
+	void	bytesWritten( qint64 );
 private:
 	Q_PID	saved_pid ;
 };
@@ -41,9 +42,12 @@ public:
 	Q_INVOKABLE int start(QString, QStringList);	/* returns pid */
 	Q_INVOKABLE bool stop(int pid);
 	Q_INVOKABLE QString read(int pid, int fd);
-	Q_INVOKABLE int write(int pid,int fd, QString s);
+	Q_INVOKABLE int write(int pid,QString s);
+	Q_INVOKABLE int close_write(int pid);
 
 	Q_INVOKABLE void exit(int retval);
+	Q_INVOKABLE QStringList arguments(void);
+
 signals:
 	void onInput(int pid, int fd);
 	void onExit(int pid, int exitstat);

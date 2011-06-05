@@ -23,6 +23,7 @@ childProcess_t::childProcess_t (process_t * parent)
 	QObject::connect(this, SIGNAL(readyReadStandardOutput(void)), this, SLOT(readyReadStandardOutput(void)));
 	QObject::connect(this, SIGNAL(started (void)), this, SLOT(started (void)));
 	QObject::connect(this, SIGNAL(stateChanged(QProcess::ProcessState)), this, SLOT(stateChanged(QProcess::ProcessState)));
+	QObject::connect(this, SIGNAL(bytesWritten(qint64)), this, SLOT(bytesWritten(qint64)));
 }
 
 childProcess_t::~childProcess_t ()
@@ -55,13 +56,18 @@ void childProcess_t::readyReadStandardOutput()
 void childProcess_t::started ()
 {
 	saved_pid = pid();
-	printf("%s: pid %lld\n", __PRETTY_FUNCTION__, saved_pid );
+//	printf("%s: pid %lld\n", __PRETTY_FUNCTION__, saved_pid );
 	((process_t *)parent())->started(this);
 }
 
 void childProcess_t::stateChanged ( QProcess::ProcessState newState )
 {
-	printf("%s: %d\n", __PRETTY_FUNCTION__, newState );
+//	printf("%s: %d\n", __PRETTY_FUNCTION__, newState );
+}
+
+void childProcess_t::bytesWritten( qint64 count)
+{
+//	printf( "%s: %lld\n", __PRETTY_FUNCTION__, count);
 }
 
 process_t::process_t()
@@ -146,9 +152,28 @@ QString process_t::read(int pid, int fd)
 	return QString();
 }
 
-int process_t::write(int pid,int fd, QString s)
+int process_t::write(int pid,QString s)
 {
-	return -1 ;
+	printf("%s: write %s to pid %d\n", __PRETTY_FUNCTION__, s.toAscii().constData(), pid);
+	int rval = -1 ;
+	QMap<Q_PID,childProcess_t *>::const_iterator it = processes.find(pid);
+	if (it != processes.end()) {
+		rval = (*it)->write(s.toAscii());
+		printf( "wrote %d, left %lld\n", rval, (*it)->bytesToWrite());
+	}
+	return rval;
+}
+
+Q_INVOKABLE int process_t::close_write(int pid)
+{
+	printf("%s: close write to pid %d\n", __PRETTY_FUNCTION__, pid);
+	int rval = -1 ;
+	QMap<Q_PID,childProcess_t *>::const_iterator it = processes.find(pid);
+	if (it != processes.end()) {
+		(*it)->closeWriteChannel();
+		rval = 0 ;
+	}
+	return rval;
 }
 
 void process_t::started(childProcess_t *child)
@@ -180,4 +205,9 @@ void process_t::fdReady(childProcess_t *child, int fd) {
 
 void process_t::exit(int retval) {
 	QApplication::instance()->exit(retval);
+}
+
+QStringList process_t::arguments(void)
+{
+	return QApplication::arguments();
 }
