@@ -5,7 +5,7 @@ LD		:= ${CROSS_COMPILE}g++
 AR		:= ${CROSS_COMPILE}ar
 STRIP		:= ${CROSS_COMPILE}strip
 
-LTIB=/home/ericn/ltib/rootfs
+LTIB=/home/ericn/ltib_201103/rootfs
 QT=${LTIB}/usr/local/Trolltech/Qt-4.7.1
 QTINC=${QT}/include
 QTLIB=${QT}/lib
@@ -29,7 +29,8 @@ qtbrowser: main.o \
 	magstripe.o moc_magstripe.o \
 	mainwindow.o moc_mainwindow.o \
 	process.o moc_process.o \
-	stronglink.o rfid.o moc_rfid.o
+	stronglink.o rfid.o moc_rfid.o \
+	print.o moc_print.o
 	@echo "=== linking:" $@
 	${CXX} ${LDFLAGS} $^ -o $@
 

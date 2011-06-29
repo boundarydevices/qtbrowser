@@ -47,9 +47,11 @@
 #include "magstripe.h"
 #include "process.h"
 #include "rfid.h"
+#include "print.h"
 #include <QWebView>
 #include <QtNetwork/QNetworkSession>
 #include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkCookieJar>
 
 class QWebFrame;
 class QWebView;
@@ -57,6 +59,31 @@ QT_BEGIN_NAMESPACE
 class QLineEdit;
 QT_END_NAMESPACE
 
+class MyNetworkCookieJar : public QNetworkCookieJar {
+	Q_OBJECT
+public:
+	MyNetworkCookieJar ( QObject * parent = 0 )
+		: QNetworkCookieJar(parent){
+		printf("%s\n", __func__ );
+	}
+	virtual ~MyNetworkCookieJar () {
+		printf("%s\n", __func__ );
+	}
+	Q_INVOKABLE bool clear();
+	virtual QList<QNetworkCookie> cookiesForUrl ( const QUrl & url ) const {
+		printf("%p, %s: %s\n", this, __func__, url.toString().toUtf8().data() );
+		return QNetworkCookieJar::cookiesForUrl(url);
+	}
+        virtual bool setCookiesFromUrl ( const QList<QNetworkCookie> & cookieList, const QUrl & url ) {
+		printf("%s: %s\n", __func__, url.toString().toUtf8().data() );
+		QList<QNetworkCookie>::const_iterator it = cookieList.begin();
+		while (it != cookieList.end()) {
+			QNetworkCookie cookie = *it++ ;
+			printf( "\t%s: %s\n", cookie.name().constData(), cookie.value().constData());
+		}
+                return QNetworkCookieJar::setCookiesFromUrl(cookieList,url);
+	}
+};
 
 class popupWebView_t : public QWebView {
     Q_OBJECT
@@ -85,13 +112,14 @@ protected slots:
 
 class mainWebView_t : public QWebView {
 public:
-	explicit mainWebView_t(QWidget* parent = 0): QWebView(parent), corners_(0){}
+	explicit mainWebView_t(QWidget* parent = 0): QWebView(parent), corners_(0), cookieJar(0){}
 protected:
 	virtual QWebView *createWindow(QWebPage::WebWindowType type);
 	void mouseMoveEvent ( QMouseEvent * ev );
 	void mouseReleaseEvent ( QMouseEvent * ev );
 private:
 	unsigned corners_ ;
+	MyNetworkCookieJar *cookieJar ;
 };
 
 class MainWindow : public QMainWindow
@@ -100,6 +128,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(const QUrl& url);
+    ~MainWindow(void);
 
 protected slots:
     void finishLoading(bool);
@@ -121,10 +150,13 @@ protected slots:
     void sslErrors ( QNetworkReply * reply, const QList<QSslError> & errors );
 
     void readStdin(int fd);
+protected:
+    void closeEvent ( QCloseEvent * event );
+
 private:
     QLinkedList<QString> jsFiles ;
     QSocketNotifier	 stdinReady ;
-    QWebView *view;
+    mainWebView_t *view;
     kbdInput_t	kbd ;
     bcInput_t   bc ;
     accelInput_t accel ;
@@ -132,4 +164,6 @@ private:
     magstripe_t magstripe ;
     rfidReader_t rfid ;
     process_t	 process ;
+    printer_t	 printer ;
+    MyNetworkCookieJar *jar ;
 };

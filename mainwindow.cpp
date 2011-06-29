@@ -42,32 +42,14 @@
 #include <QtWebKit>
 #include <QtNetwork/QNetworkConfigurationManager>
 #include "mainwindow.h"
-#include <QtNetwork/QNetworkCookieJar>
 #include <fcntl.h>
 
-class MyNetworkCookieJar : public QNetworkCookieJar {
-public:
-	MyNetworkCookieJar ( QObject * parent = 0 )
-		: QNetworkCookieJar(parent){
-		printf("%s\n", __func__ );
-	}
-	virtual ~MyNetworkCookieJar () {
-		printf("%s\n", __func__ );
-	}
-	virtual QList<QNetworkCookie> cookiesForUrl ( const QUrl & url ) const {
-		printf("%s: %s\n", __func__, url.toString().toUtf8().data() );
-		return QNetworkCookieJar::cookiesForUrl(url);
-	}
-        virtual bool setCookiesFromUrl ( const QList<QNetworkCookie> & cookieList, const QUrl & url ) {
-		printf("%s: %s\n", __func__, url.toString().toUtf8().data() );
-		QList<QNetworkCookie>::const_iterator it = cookieList.begin();
-		while (it != cookieList.end()) {
-			QNetworkCookie cookie = *it++ ;
-			printf( "\t%s: %s\n", cookie.name().constData(), cookie.value().constData());
-		}
-                return QNetworkCookieJar::setCookiesFromUrl(cookieList,url);
-	}
-};
+bool MyNetworkCookieJar::clear() {
+	printf( "%s\n", __func__ );
+        QList<QNetworkCookie> empty;
+	setAllCookies(empty);
+	return true ;
+}
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(__arr) (sizeof(__arr)/sizeof(__arr[0]))
@@ -173,9 +155,6 @@ QWebView *mainWebView_t::createWindow(QWebPage::WebWindowType type)
 		connect(rval->page()->mainFrame(), SIGNAL(loadStarted()), rval, SLOT(loadStarted()));
 		connect(rval->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), rval, SLOT(javaScriptWindowObjectCleared()));
 		connect(rval->page(), SIGNAL(frameCreated(QWebFrame*)), rval, SLOT(frameCreated(QWebFrame*)));
-                QNetworkCookieJar *old_jar = na_manager->cookieJar();
-		na_manager->setCookieJar(new MyNetworkCookieJar(old_jar?old_jar->parent() : 0));
-		printf( "%s: set cookie jar to %p\n", __func__, na_manager->cookieJar());
 	}
 	return rval ;
 }
@@ -210,15 +189,19 @@ static unsigned corner_bit(int x, int y, int w, int h){
 
 void mainWebView_t::mouseMoveEvent ( QMouseEvent * ev )
 {
+	unsigned const old = corners_ ;
 	corners_ |= corner_bit(ev->x(), ev->y(),this->width(), this->height());
-	printf( "%s:%u:%u of %ux%u: %x\n", __func__, ev->x(), ev->y(),this->width(),this->height(), corners_ );
+	if (old != corners_) {
+		printf( "%s:%u:%u of %ux%u: %x\n", __func__, ev->x(), ev->y(),this->width(),this->height(), corners_ );
+	}
 	return QWebView::mouseMoveEvent(ev);
 }
 
 void mainWebView_t::mouseReleaseEvent ( QMouseEvent * ev )
 {
 	if (ALL_CORNERS==corners_) {
-		exit(0);
+		parentWidget()->close();
+		QApplication::instance()->exit(0);
 	}
 	else {
 		corners_ = 0 ;
@@ -234,6 +217,7 @@ MainWindow::MainWindow(const QUrl& url)
 	, magstripe()
 	, rfid()
 	, process()
+	, jar(0)
 {
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -298,8 +282,9 @@ MainWindow::MainWindow(const QUrl& url)
     printf("Network access manager signals connected\n");
 
     QNetworkCookieJar *old_jar = na_manager->cookieJar();
-    na_manager->setCookieJar(new MyNetworkCookieJar(old_jar?old_jar->parent() : 0));
-    printf( "set cookie jar to %p\n", na_manager->cookieJar());
+    jar = new MyNetworkCookieJar(old_jar?old_jar->parent() : 0);
+    na_manager->setCookieJar(jar);
+    printf( "set cookie jar to %p\n", jar);
 
     connect(view->page()->mainFrame(), SIGNAL(loadStarted()), this, SLOT(loadStarted()));
     connect(view->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(javaScriptWindowObjectCleared()));
@@ -314,6 +299,16 @@ MainWindow::MainWindow(const QUrl& url)
     }
     else
 	    printf( "stdin is not a tty\n");
+
+    QNetworkDiskCache *diskCache = qobject_cast<QNetworkDiskCache *>(na_manager->cache());
+    if (diskCache) {
+	    printf(" network cache size %lld, directory %s\n", diskCache->maximumCacheSize(), diskCache->cacheDirectory().toAscii().constData());
+    } else
+	    printf( "-------> no disk cache: %p\n", na_manager->cache());
+}
+
+MainWindow::~MainWindow(void) {
+	process.shutdown();
 }
 
 void MainWindow::finishLoading(bool success)
@@ -341,6 +336,8 @@ void MainWindow::javaScriptWindowObjectCleared(void)
         view->page()->mainFrame()->addToJavaScriptWindowObject("accel",&accel);
         view->page()->mainFrame()->addToJavaScriptWindowObject("gps",&gps);
         view->page()->mainFrame()->addToJavaScriptWindowObject("Process",&process);
+        view->page()->mainFrame()->addToJavaScriptWindowObject("Printer",&printer);
+	view->page()->mainFrame()->addToJavaScriptWindowObject("Cookies",jar);
 }
 
 void MainWindow::frameCreated(QWebFrame *frame)
@@ -413,5 +410,11 @@ void MainWindow::readStdin(int fd)
                 QVariant result = view->page()->mainFrame()->evaluateJavaScript(qs);
 		qDebug() << result ;
 	}
+}
+
+void MainWindow::closeEvent ( QCloseEvent * event )
+{
+	process.shutdown();
+        QMainWindow::closeEvent(event);
 }
 
