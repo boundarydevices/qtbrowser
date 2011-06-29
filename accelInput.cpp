@@ -13,6 +13,15 @@
 
 accelInput_t::accelInput_t()
 	: dev(0)
+	, xmax(0)
+	, ymax(0)
+	, zmax(0)
+	, xmin(0)
+	, ymin(0)
+	, zmin(0)
+	, x(0)
+	, y(0)
+	, z(0)
 {
     char devname[PATH_MAX];
     char *filename;
@@ -33,6 +42,7 @@ accelInput_t::accelInput_t()
             (de->d_name[1] == '.' && de->d_name[2] == '\0')))
             continue;
         strcpy(filename, de->d_name);
+	printf( "%s: try %s\n", __func__, filename);
 	int fd = open(devname, O_RDONLY|O_NONBLOCK);
 	if (0 <= fd) {
 		char abs_bitmask[(ABS_MAX+7)/8];
@@ -40,21 +50,37 @@ accelInput_t::accelInput_t()
 		if ((ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask) >= 0)
 		    &&
 		    (0 != (abs_bitmask[ABS_Z/8]&(1<<(ABS_Z&7))))) {
-			struct input_absinfo xinfo ;
-			struct input_absinfo yinfo ;
-			struct input_absinfo zinfo ;
-			if ((ioctl(fd, EVIOCGABS(ABS_X), &xinfo) >= 0)
-			    &&
-			    (ioctl(fd, EVIOCGABS(ABS_Y), &yinfo) >= 0)
-			    &&
-			    (ioctl(fd, EVIOCGABS(ABS_Z), &zinfo) >= 0)){
-				dev = new QSocketNotifier(fd,dev->Read);
-				QObject::connect(dev, SIGNAL(activated(int)), this, SLOT(readData(int)));
-	printf ("%s: connected on %s\n", __func__, filename );
-	printf("%s: abs_x: %d..%d\n", __func__, xinfo.minimum, xinfo.maximum);
-	printf("%s: abs_y: %d..%d\n", __func__, yinfo.minimum, yinfo.maximum);
-	printf("%s: abs_z: %d..%d\n", __func__, zinfo.minimum, zinfo.maximum);
-				break ;
+			char name[256]= "Unknown";
+			int namelen ;
+			if((namelen=ioctl(fd, EVIOCGNAME(sizeof(name)), name)) >= 0) {
+				struct input_absinfo xinfo ;
+				struct input_absinfo yinfo ;
+				struct input_absinfo zinfo ;
+				name[namelen] = 0 ;
+				if (strcasestr(name,"ccel")) {
+					if ((ioctl(fd, EVIOCGABS(ABS_X), &xinfo) >= 0)
+					    &&
+					    (ioctl(fd, EVIOCGABS(ABS_Y), &yinfo) >= 0)
+					    &&
+					    (ioctl(fd, EVIOCGABS(ABS_Z), &zinfo) >= 0)){
+						dev = new QSocketNotifier(fd,dev->Read);
+						QObject::connect(dev, SIGNAL(activated(int)), this, SLOT(readData(int)));
+						xmax=xinfo.maximum ;
+						ymax=yinfo.maximum ;
+						zmax=zinfo.maximum ;
+						xmin=xinfo.minimum ;
+						ymin=yinfo.minimum ;
+						zmin=zinfo.minimum ;
+			printf ("%s: connected on %s\n", __func__, filename );
+			printf("%s: abs_x: %d..%d\n", __func__, xmin, xmax);
+			printf("%s: abs_y: %d..%d\n", __func__, ymin, ymax);
+			printf("%s: abs_z: %d..%d\n", __func__, zmin, zmax);
+						break ;
+				}
+				else
+					printf( "%s: %s: not accelerometer\n", devname, name);
+				} else
+					perror(devname);
 			} else
 				perror(devname);
 		} else
@@ -81,16 +107,16 @@ void accelInput_t::readData(int fd)
 			struct input_event const &event = buffer[i];
 			if (EV_ABS == event.type) {
 				if (ABS_X == event.code) {
-					x = ((double)event.value)*0.047 ;
+					x = event.value ;
 				} else if (ABS_Y == event.code) {
-					y = ((double)event.value)*0.047 ;
+					y = event.value ;
 				} else if (ABS_Z == event.code) {
-					z = ((double)event.value)*0.047 ;
+					z = event.value ;
 				} else {
 					printf ("unknown ABS code %d\n", event.code);
 				}
 			} else if (EV_SYN == event.type) {
-				emit accelchange(x,y,z);
+				emit accelchange(1.0*x,1.0*y,1.0*z);
 			}
 		}
 	}
