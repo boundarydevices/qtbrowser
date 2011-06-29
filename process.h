@@ -36,6 +36,8 @@ public:
 	process_t();
 	~process_t();
 
+	void shutdown(void);
+
 	Q_INVOKABLE QString popen(QString);
 
 	Q_INVOKABLE int start(QString);	/* returns pid */

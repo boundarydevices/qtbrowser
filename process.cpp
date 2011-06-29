@@ -12,6 +12,7 @@
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <termios.h>
+#include <signal.h>
 
 childProcess_t::childProcess_t (process_t * parent)
 	: QProcess(parent)
@@ -76,6 +77,18 @@ process_t::process_t()
 
 process_t::~process_t()
 {
+}
+
+void process_t::shutdown()
+{
+	printf( "%s:\n", __func__ );
+	while (!processes.empty()) {
+                QMap<Q_PID,childProcess_t *>::iterator it = processes.begin();
+		::kill((*it)->pid(), SIGHUP);
+		sleep(1);
+		(*it)->kill();
+		processes.erase(it);
+	}
 }
 
 void process_t::readData(int fd)
@@ -204,6 +217,8 @@ void process_t::fdReady(childProcess_t *child, int fd) {
 }
 
 void process_t::exit(int retval) {
+	printf( "%s:\n", __func__ );
+	shutdown();
 	QApplication::instance()->exit(retval);
 }
 
