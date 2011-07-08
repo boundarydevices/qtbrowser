@@ -30,6 +30,7 @@ private:
         QLinkedList<QSocketNotifier *> devs ;
 	QString		 	     barcode ;
 	QString			     parsing ;
+	char const		    *exitbc ;
 };
 
 #endif

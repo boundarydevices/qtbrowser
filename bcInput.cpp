@@ -92,6 +92,7 @@ static bool baudRateToConst( unsigned bps, unsigned &constant )
 bcInput_t::bcInput_t()
 	: barcode("")
 	, parsing("")
+	, exitbc(0)
 {
 	char *descr=getenv("BCDEV");
 	if (descr) {
@@ -164,6 +165,13 @@ bcInput_t::bcInput_t()
                         QSocketNotifier *dev = new QSocketNotifier(fd,dev->Read);
                         devs.push_back(dev);
 			QObject::connect(dev, SIGNAL(activated(int)), this, SLOT(readData(int)));
+
+                        exitbc=getenv("BCEXIT");
+			if (exitbc) {
+				printf( "have exit barcode %s\n", exitbc);
+				exitbc=strdup(exitbc);
+				printf( "now exit barcode %s(%p)\n", exitbc,exitbc);
+			}
 		}
 		else
 			perror(cdevname);
@@ -182,6 +190,9 @@ bcInput_t::~bcInput_t()
 			delete dev ;
 		}
 	}
+	if (exitbc) {
+		free((void *)exitbc);
+	}
 }
 
 void bcInput_t::readData(int fd)
@@ -195,8 +206,14 @@ void bcInput_t::readData(int fd)
 			if (iscntrl(c)) {
 				if (0 < parsing.length()) {
 					barcode = parsing ;
-                                        emit scanned(barcode);
-					parsing.clear();
+					printf( "barcode %s\n", barcode.toLocal8Bit().data());
+					printf( "exit %s(%p)\n", exitbc, exitbc);
+					if ((0 != exitbc) && (0 == strcasecmp(exitbc,barcode.toLocal8Bit().data()))) {
+						exit(0);
+					} else {
+						emit scanned(barcode);
+						parsing.clear();
+					}
 				}
 			} else
 				parsing += c ;
