@@ -25,7 +25,9 @@ qtbrowser: main.o \
 	kbdInput.o moc_kbdInput.o \
 	bcInput.o moc_bcInput.o \
 	gpsInput.o moc_gpsInput.o \
+	three_axis_input.o moc_three_axis_input.o \
 	accelInput.o moc_accelInput.o \
+	compassInput.o moc_compassInput.o \
 	magstripe.o moc_magstripe.o \
 	mainwindow.o moc_mainwindow.o \
 	process.o moc_process.o \
