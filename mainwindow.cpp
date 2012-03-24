@@ -334,6 +334,7 @@ void MainWindow::javaScriptWindowObjectCleared(void)
         view->page()->mainFrame()->addToJavaScriptWindowObject("magstripe",&magstripe);
         view->page()->mainFrame()->addToJavaScriptWindowObject("rfid",&rfid);
         view->page()->mainFrame()->addToJavaScriptWindowObject("accel",&accel);
+        view->page()->mainFrame()->addToJavaScriptWindowObject("compass",&compass);
         view->page()->mainFrame()->addToJavaScriptWindowObject("gps",&gps);
         view->page()->mainFrame()->addToJavaScriptWindowObject("Process",&process);
         view->page()->mainFrame()->addToJavaScriptWindowObject("Printer",&printer);

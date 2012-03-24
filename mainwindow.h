@@ -43,6 +43,7 @@
 #include "kbdInput.h"
 #include "bcInput.h"
 #include "accelInput.h"
+#include "compassInput.h"
 #include "gpsInput.h"
 #include "magstripe.h"
 #include "process.h"
@@ -160,6 +161,7 @@ private:
     kbdInput_t	kbd ;
     bcInput_t   bc ;
     accelInput_t accel ;
+    compassInput_t compass ;
     gpsInput_t gps ;
     magstripe_t magstripe ;
     rfidReader_t rfid ;
