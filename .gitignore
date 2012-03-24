@@ -2,3 +2,4 @@
 qtbrowser
 moc_*.cpp
 stronglink
+cbmWrap
