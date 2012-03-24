@@ -17,7 +17,6 @@
 childProcess_t::childProcess_t (process_t * parent)
 	: QProcess(parent)
 {
-	printf("%s\n", __PRETTY_FUNCTION__ );
 	QObject::connect(this, SIGNAL(error (QProcess::ProcessError)), this, SLOT(error (QProcess::ProcessError)));
 	QObject::connect(this, SIGNAL(finished (int, QProcess::ExitStatus)), this, SLOT(finished (int, QProcess::ExitStatus)));
 	QObject::connect(this, SIGNAL(readyReadStandardError(void)), this, SLOT(readyReadStandardError(void)));
@@ -81,7 +80,6 @@ process_t::~process_t()
 
 void process_t::shutdown()
 {
-	printf( "%s:\n", __func__ );
 	while (!processes.empty()) {
                 QMap<Q_PID,childProcess_t *>::iterator it = processes.begin();
 		::kill((*it)->pid(), SIGHUP);
@@ -102,7 +100,6 @@ QString process_t::popen(QString cmdline)
 	QByteArray ascii = cmdline.toAscii();
 	FILE *fproc = ::popen(ascii.constData(), "r");
 	if (fproc) {
-		printf( "opened %s\n", ascii.constData());
 		char inbuf[2048];
 		int numRead ;
 		while (0 < (numRead=fread(inbuf,1,sizeof(inbuf)-1,fproc))) {
@@ -142,7 +139,6 @@ int process_t::start(QString program)
 
 bool process_t::stop(int pid)
 {
-	printf("%s: %d\n", __PRETTY_FUNCTION__, pid);
 	QMap<Q_PID,childProcess_t *>::const_iterator it = processes.find(pid);
 	if (it != processes.end()) {
 		(*it)->kill();
@@ -167,19 +163,16 @@ QString process_t::read(int pid, int fd)
 
 int process_t::write(int pid,QString s)
 {
-	printf("%s: write %s to pid %d\n", __PRETTY_FUNCTION__, s.toAscii().constData(), pid);
 	int rval = -1 ;
 	QMap<Q_PID,childProcess_t *>::const_iterator it = processes.find(pid);
 	if (it != processes.end()) {
 		rval = (*it)->write(s.toAscii());
-		printf( "wrote %d, left %lld\n", rval, (*it)->bytesToWrite());
 	}
 	return rval;
 }
 
 Q_INVOKABLE int process_t::close_write(int pid)
 {
-	printf("%s: close write to pid %d\n", __PRETTY_FUNCTION__, pid);
 	int rval = -1 ;
 	QMap<Q_PID,childProcess_t *>::const_iterator it = processes.find(pid);
 	if (it != processes.end()) {
@@ -217,7 +210,6 @@ void process_t::fdReady(childProcess_t *child, int fd) {
 }
 
 void process_t::exit(int retval) {
-	printf( "%s:\n", __func__ );
 	shutdown();
 	QApplication::instance()->exit(retval);
 }
