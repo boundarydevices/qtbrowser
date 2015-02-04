@@ -53,6 +53,7 @@
 #include <QtNetwork/QNetworkSession>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkCookieJar>
+#include <unistd.h>
 
 class QWebFrame;
 class QWebView;
