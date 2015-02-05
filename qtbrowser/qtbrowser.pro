@@ -1,6 +1,5 @@
 TEMPLATE = app
 TARGET = qtbrowser
-SUBDIRS = stronglink
 
 QT += webkit network
 
