@@ -193,7 +193,7 @@ static bool build_message_list( QVariantList const &vl,
 				QString data = (datait != v.end())
 						? (*datait).toString()
 					        : empty_string;
-				msgs.push_back(rfid_message_t((*codeit).toInt(),data.toAscii()));
+				msgs.push_back(rfid_message_t((*codeit).toInt(),data.toLatin1()));
 			} else {
 				printf( "message is missing code\n");
 				return false ;

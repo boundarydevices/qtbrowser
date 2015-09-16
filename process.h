@@ -6,6 +6,7 @@
  * reading GPS sentences from an attached GPS receiver.
  */
 
+#include <QApplication>
 #include <QtGui>
 #include <QMap>
 

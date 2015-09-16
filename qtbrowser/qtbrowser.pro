@@ -1,7 +1,7 @@
 TEMPLATE = app
 TARGET = qtbrowser
 
-QT += webkit network
+QT += webkit network widgets webkitwidgets
 
 # Input
 HEADERS += ../accelInput.h ../bcInput.h ../compassInput.h ../gpsInput.h ../kbdInput.h ../magstripe.h ../mainwindow.h ../print.h ../process.h ../rfid.h ../stronglink.h ../three_axis_input.h

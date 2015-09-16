@@ -38,6 +38,7 @@
 **
 ****************************************************************************/
 
+#include <QApplication>
 #include <QtGui>
 #include <QLinkedList>
 #include "kbdInput.h"
@@ -50,9 +51,12 @@
 #include "rfid.h"
 #include "print.h"
 #include <QWebView>
-#include <QtNetwork/QNetworkSession>
-#include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkCookieJar>
+#include <QDesktopWidget>
+#include <QNetworkSession>
+#include <QNetworkAccessManager>
+#include <QNetworkCookie>
+#include <QNetworkCookieJar>
+#include <QMainWindow>
 #include <unistd.h>
 
 class QWebFrame;

@@ -2,7 +2,8 @@
  * This module file defines the methods of the kbdInput_t class for use in 
  * reading Linux input events
  */
- 
+
+#include <QApplication>
 #include "kbdInput.h"
 #include <unistd.h>
 #include <stdlib.h>

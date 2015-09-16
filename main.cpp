@@ -38,11 +38,10 @@
 **
 ****************************************************************************/
 
-#include <QtGui>
 #include "mainwindow.h"
-#include <QtNetwork/QSslSocket>
-#include <QtNetwork/QSslCertificate>
-#include <QtNetwork/QSslCipher>
+#include <QSslSocket>
+#include <QSslCertificate>
+#include <QSslCipher>
 
 int main(int argc, char * argv[])
 {

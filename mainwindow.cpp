@@ -40,7 +40,8 @@
 
 #include <QtGui>
 #include <QtWebKit>
-#include <QtNetwork/QNetworkConfigurationManager>
+#include <QNetworkConfigurationManager>
+#include <QWebFrame>
 #include "mainwindow.h"
 #include <fcntl.h>
 
@@ -302,7 +303,7 @@ MainWindow::MainWindow(const QUrl& url)
 
     QNetworkDiskCache *diskCache = qobject_cast<QNetworkDiskCache *>(na_manager->cache());
     if (diskCache) {
-	    printf(" network cache size %lld, directory %s\n", diskCache->maximumCacheSize(), diskCache->cacheDirectory().toAscii().constData());
+	    printf(" network cache size %lld, directory %s\n", diskCache->maximumCacheSize(), diskCache->cacheDirectory().toLatin1().constData());
     } else
 	    printf( "-------> no disk cache: %p\n", na_manager->cache());
 }

@@ -97,7 +97,7 @@ QString process_t::popen(QString cmdline)
 {
 	QByteArray s ;
 	s.reserve(0x1000);
-	QByteArray ascii = cmdline.toAscii();
+	QByteArray ascii = cmdline.toLatin1();
 	FILE *fproc = ::popen(ascii.constData(), "r");
 	if (fproc) {
 		char inbuf[2048];
@@ -119,7 +119,7 @@ int process_t::start(QString program, QStringList args)
 		processes[child->pid()] = child ;
 		return child->pid();
 	} else {
-		fprintf(stderr, "Error %m starting %s\n", program.toAscii().constData());
+		fprintf(stderr, "Error %m starting %s\n", program.toLatin1().constData());
 	}
 	return -1 ;
 }
@@ -132,7 +132,7 @@ int process_t::start(QString program)
 		processes[child->pid()] = child ;
 		return child->pid();
 	} else {
-		fprintf(stderr, "Error %m starting %s\n", program.toAscii().constData());
+		fprintf(stderr, "Error %m starting %s\n", program.toLatin1().constData());
 	}
 	return -1 ;
 }
@@ -166,7 +166,7 @@ int process_t::write(int pid,QString s)
 	int rval = -1 ;
 	QMap<Q_PID,childProcess_t *>::const_iterator it = processes.find(pid);
 	if (it != processes.end()) {
-		rval = (*it)->write(s.toAscii());
+		rval = (*it)->write(s.toLatin1());
 	}
 	return rval;
 }
