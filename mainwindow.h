@@ -50,6 +50,7 @@
 #include "process.h"
 #include "rfid.h"
 #include "print.h"
+#include "RRWebPage.h"
 #include <QWebView>
 #include <QDesktopWidget>
 #include <QNetworkSession>
@@ -120,7 +121,7 @@ class mainWebView_t : public QWebView {
 public:
 	explicit mainWebView_t(QWidget* parent = 0): QWebView(parent), corners_(0), cookieJar(0){}
 protected:
-	virtual QWebView *createWindow(QWebPage::WebWindowType type);
+	virtual QWebView *createWindow(RRWebPage::WebWindowType type);
 	void mouseMoveEvent ( QMouseEvent * ev );
 	void mouseReleaseEvent ( QMouseEvent * ev );
 private:

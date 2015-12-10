@@ -133,13 +133,13 @@ void popupWebView_t::sslErrors ( QNetworkReply * reply, const QList<QSslError> &
     printf ("%s: %d\n", __func__, forgivable); 
 }
 
-QWebView *mainWebView_t::createWindow(QWebPage::WebWindowType type)
+QWebView *mainWebView_t::createWindow(RRWebPage::WebWindowType type)
 {
         QWebView *rval = new popupWebView_t(this);
 
 	printf ("%s: %p, type %d\n", __func__, rval, type );
 	if (rval) {
-		rval->setPage(new QWebPage(rval));
+		rval->setPage(new RRWebPage(rval));
 		rval->setRenderHints( QPainter::Antialiasing 
 				| QPainter::TextAntialiasing );
 		rval->showNormal();
