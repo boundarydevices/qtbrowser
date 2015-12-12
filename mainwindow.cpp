@@ -220,6 +220,8 @@ MainWindow::MainWindow(const QUrl& url)
 	, process()
 	, jar(0)
 {
+		QWebSettings::globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+
     QNetworkProxyFactory::setUseSystemConfiguration(true);
 
     QNetworkConfigurationManager manager;
